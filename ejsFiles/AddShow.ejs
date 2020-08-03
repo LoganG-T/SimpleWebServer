@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <% if(recordedShows.length > 0) { %>
+      <p> All shows </p>
+      <table>
+        <tr>
+          <td> Show name</td>
+          <td> Rating</td>
+          <td> Season</td>
+        </tr>
+        <% for(i = 0; i < recordedShows.length; i++){ %>
+          <tr>
+            <td> <%= recordedShows[i].name %></td>
+            <td> <%= recordedShows[i].rating %></td>
+            <td> <%= recordedShows[i].season %></td>
+          </tr>
+        <% } %>
+      </table>
+    <% } %>
+
+    <form id="form1" action="/addshow" method="get">
+                <input type="text" id="num1"></input>
+                <input type="text" id="num2"></imput>
+                <input type="submit" id="addShows" value="addShows"> </input>
+            </form>
+  </body>
+</html>

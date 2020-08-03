@@ -1,0 +1,128 @@
+<html>
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+<body>
+  <% if(recordedShows.length > 0) { %>
+    <div>
+    <p style="display:inline-block;"> All shows </p>
+    <input type=text id="showsearch" placeholder="Search shows" style="display:inline-block;" />
+    </div>
+    <table id="showTable">
+      <tr>
+        <td> Show name</td>
+        <td> Rating</td>
+        <td> Season</td>
+        <td> Added at</td>
+      </tr>
+      <% for(i = 0; i < recordedShows.length; i++){
+        s = "row" + recordedShows[i].id;
+        na = "name" + recordedShows[i].id;
+        ra = "rating" + recordedShows[i].id;
+        se = "season" + recordedShows[i].id; %>
+        <tr id=<%=s%>>
+          <td id=<%=na%> onclick='EditFunction(this.id)'> <%= recordedShows[i].name %></td>
+          <td id=<%=ra%>> <%= recordedShows[i].rating %></td>
+          <td id=<%=se%>> <%= recordedShows[i].season %></td>
+          <td> <%= recordedShows[i].addedAt %></td>
+          <td> <button id=<%=recordedShows[i].id%> onclick="DisplayValue(this.id)">Remove entry</button> </td>
+        </tr>
+      <% } %>
+    </table>
+  <% } %>
+
+  <button id="StartAdd">Add new show </button>
+
+  <form id="AddShowForm" style="display:none;">
+    <label for="show">Show name:</label>
+    <input type="text" id="show" name="show"></input> <br />
+    <label for="season">Show season:</label>
+    <input type="text" id="season" name="season"></input> <br />
+    <label for="rating">Show rating</label>
+    <input type="text" id="rating" name="rating"></input> <br />
+    <input type="button" id="addShows" value="Confirm show"> </input>
+  </form>
+
+  <script type="text/javascript">
+  function DisplayValue(g_info){
+    $(document).ready(function () {
+        console.log(g_info.toString());
+        console.log("CLICK CLICK");
+        $.ajax({
+          url : "/removeshow" + "?user=logan&id=" + g_info,
+          type : 'GET',
+          dataType : 'json',
+          //data: $("#AddShowForm").serialize(),
+          success : function(data) {
+            console.log("DONE " + "#row" + g_info.toString());
+            $("#row" + g_info).remove();
+          },
+          error : function() {
+              console.log('error');
+          }
+      });
+    });
+  }
+
+  function EditFunction(g_id){
+    console.log($("#" + g_id).val());
+    console.log("EDIT NOW");
+  }
+
+  $("#showsearch").keyup(function(event) {
+    if (event.keyCode === 13) {
+        console.log("Entered");
+        $.ajax({
+          url : "/searchshows" + "?user=logan&lookfor=" + $("#showsearch").val().replace(" ", "%20"),
+          type : 'GET',
+          dataType : 'json',
+          //data: $("#AddShowForm").serialize(),
+          success : function(data) {
+            $("#showTable tbody tr").remove();
+
+            $('#showTable').append("<tr><td>Show name</td><td>Rating</td><td>Season</td></tr>");
+            for(var i = 0; i < data.length; i++){
+              $('#showTable').append("<tr><td>" + data[i].name + "</td><td>" + data[i].rating + "</td><td>" + data[i].season + "</td> " +
+              "<td><button id="+data[i].id+" onclick=\"DisplayValue(this.id)\">Remove entry</button></td>" + "</tr>");
+            }
+          },
+          error : function() {
+              console.log('error');
+          }
+      });
+
+    }
+});
+
+  $(document).ready(function() {
+    $("#StartAdd").click(function() {
+      $("#AddShowForm").toggle();
+    });
+  });
+  </script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+        $("#addShows").on("click", function (e) {
+          var current_dtime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+          $.ajax({
+            url : "/addshow" + "?user=logan&" + $("#AddShowForm").serialize() + "&addedAt=" + current_dtime,
+            type : 'GET',
+            dataType : 'json',
+            //data: $("#AddShowForm").serialize(),
+            success : function(data) {
+              console.log(data);
+              console.log(data.show);
+              console.log(data.id);
+                $('#showTable').append("<tr><td>" + data.show + "</td><td>" + data.rating + "</td><td>" + data.season + "</td><td>" + data.addedAt + "</td>" +
+                "<td><button id="+data.id+" onclick=\"DisplayValue(this.id)\">Remove entry</button></td>" + "</tr>");
+                $("#AddShowForm").toggle();
+            },
+            error : function() {
+                console.log('error');
+            }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
